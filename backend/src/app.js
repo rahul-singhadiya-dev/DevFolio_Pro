@@ -16,24 +16,38 @@ app.use(helmet({
 }));
 
 // 2. CORS Setup
+const allowedOrigins = [
+  // Always allow local development
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  // Production frontend URL (set this in your hosting env vars)
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Always allow localhost/127.0.0.1 for local development and debugging
-    if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-      callback(null, true);
-    } else if (process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      const whitelist = [
-        process.env.FRONTEND_URL, // Admin/Visitor client domain
-      ].filter(Boolean);
-      
-      if (whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Blocked by CORS policy'));
-      }
+    // Allow server-to-server requests (no origin header)
+    if (!origin) return callback(null, true);
+
+    // Check against the whitelist
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    // In development — allow everything
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+
+    // In production with no FRONTEND_URL set — allow everything (open CORS)
+    // Set FRONTEND_URL on your host to restrict this
+    if (!process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
+
+    callback(new Error(`Origin ${origin} blocked by CORS policy`));
   },
   credentials: true,
 };
