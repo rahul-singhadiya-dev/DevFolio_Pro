@@ -5,6 +5,33 @@
 
 const { execSync } = require('child_process');
 
+console.log('=== RENDER BUILD SCRIPT RUNNING ===');
+console.log('Script version: v2 (directUrl fix + environment diagnostics)');
+try {
+  const commit = execSync('git rev-parse --short HEAD').toString().trim();
+  console.log(`Git Commit: ${commit}`);
+} catch (e) {
+  console.log('Git Commit: unknown');
+}
+console.log(`DATABASE_URL env var exists: ${!!process.env.DATABASE_URL}`);
+if (process.env.DATABASE_URL) {
+  const rawDbUrl = process.env.DATABASE_URL;
+  console.log(`DATABASE_URL starts with: "${rawDbUrl.substring(0, 15)}..."`);
+  console.log(`DATABASE_URL ends with: "...${rawDbUrl.substring(rawDbUrl.length - 15)}"`);
+  console.log(`DATABASE_URL length: ${rawDbUrl.length}`);
+  console.log(`DATABASE_URL has quotes: ${rawDbUrl.startsWith('"') || rawDbUrl.startsWith("'") || rawDbUrl.endsWith('"') || rawDbUrl.endsWith("'")}`);
+}
+console.log(`DIRECT_DATABASE_URL env var exists: ${!!process.env.DIRECT_DATABASE_URL}`);
+if (process.env.DIRECT_DATABASE_URL) {
+  const rawDirectUrl = process.env.DIRECT_DATABASE_URL;
+  console.log(`DIRECT_DATABASE_URL starts with: "${rawDirectUrl.substring(0, 15)}..."`);
+  console.log(`DIRECT_DATABASE_URL ends with: "...${rawDirectUrl.substring(rawDirectUrl.length - 15)}"`);
+  console.log(`DIRECT_DATABASE_URL length: ${rawDirectUrl.length}`);
+  console.log(`DIRECT_DATABASE_URL has quotes: ${rawDirectUrl.startsWith('"') || rawDirectUrl.startsWith("'") || rawDirectUrl.endsWith('"') || rawDirectUrl.endsWith("'")}`);
+}
+console.log('====================================\n');
+
+
 // ── Step 1: prisma generate with a dummy URL ──────────────────────────────
 // prisma generate only needs a syntactically valid URL — it does NOT connect.
 // This avoids failures when DATABASE_URL has surrounding quotes or is malformed.
