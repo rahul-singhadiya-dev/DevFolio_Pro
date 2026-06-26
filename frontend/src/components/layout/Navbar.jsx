@@ -114,7 +114,7 @@ export const Navbar = () => {
                 <span>Resume</span>
               </a>
             )}
-            {(github || resume) && isAuthenticated && <span aria-hidden="true" className="h-3.5 w-[1px] bg-border"></span>}
+            {((github || resume) && isAuthenticated) && <span aria-hidden="true" className="h-3.5 w-[1px] bg-border"></span>}
             {isAuthenticated && (
               <Link to="/admin" title="Admin Dashboard" className="inline-flex rounded-full transition-transform duration-150 hover:scale-108">
                 {profile?.avatarUrl ? (
@@ -129,6 +129,19 @@ export const Navbar = () => {
                   </div>
                 )}
               </Link>
+            )}
+            {!isAuthenticated && (
+              <>
+                {(github || resume) && <span aria-hidden="true" className="h-3.5 w-[1px] bg-border"></span>}
+                <Link
+                  to="/admin/login"
+                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
+                  title="Admin Login"
+                >
+                  <User size={13} />
+                  <span>Admin</span>
+                </Link>
+              </>
             )}
           </div>
 
@@ -196,6 +209,20 @@ export const Navbar = () => {
                 onClick={handleLinkClick}
               >
                 Dashboard
+              </NavLink>
+            )}
+            {!isAuthenticated && (
+              <NavLink
+                to="/admin/login"
+                className={({ isActive }) =>
+                  cn(
+                    "text-lg font-semibold text-muted-foreground py-2 border-b border-border transition-colors hover:text-foreground",
+                    isActive && "text-foreground border-foreground/30"
+                  )
+                }
+                onClick={handleLinkClick}
+              >
+                Admin Login
               </NavLink>
             )}
             {github && (
