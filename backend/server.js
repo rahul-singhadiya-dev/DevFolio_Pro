@@ -1,6 +1,15 @@
 // Load environment variables
 require('dotenv').config();
 
+// Sanitize env vars — strip surrounding quotes that get accidentally
+// copied from .env file format (e.g. DATABASE_URL="postgresql://...")
+const ENV_KEYS_TO_SANITIZE = ['DATABASE_URL', 'JWT_SECRET', 'ADMIN_PASSWORD_HASH', 'CLOUDINARY_API_SECRET'];
+ENV_KEYS_TO_SANITIZE.forEach((key) => {
+  if (process.env[key]) {
+    process.env[key] = process.env[key].replace(/^["']|["']$/g, '').trim();
+  }
+});
+
 const app = require('./src/app');
 const prisma = require('./src/prisma/prisma');
 
