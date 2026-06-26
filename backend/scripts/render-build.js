@@ -1,46 +1,48 @@
 // scripts/render-build.js
-// This script is used by Render to build the backend.
-// It strips surrounding quotes from env vars (common copy-paste mistake)
-// then runs prisma generate + db push.
+// Render deployment build script.
+// Uses a placeholder URL for prisma generate (only needs valid format, not real connection).
+// Then sanitizes and uses the real DATABASE_URL for prisma db push.
 
 const { execSync } = require('child_process');
 
-// ── Sanitize env vars ──────────────────────────────────────────────────────
-// Render sometimes gets quoted values if user copies from .env file format
-const KEYS = ['DATABASE_URL', 'JWT_SECRET', 'ADMIN_PASSWORD_HASH', 'CLOUDINARY_API_SECRET'];
-KEYS.forEach((key) => {
-  if (process.env[key]) {
-    const cleaned = process.env[key].replace(/^["']|["']$/g, '').trim();
-    process.env[key] = cleaned;
-  }
-});
-
-// Validate DATABASE_URL before running Prisma
-const dbUrl = process.env.DATABASE_URL || '';
-if (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://')) {
-  console.error('\n❌ DATABASE_URL is missing or invalid!');
-  console.error('   Current value starts with:', JSON.stringify(dbUrl.slice(0, 30)));
-  console.error('   Make sure DATABASE_URL is set on Render WITHOUT quotes.\n');
-  process.exit(1);
-}
-
-console.log('✔ DATABASE_URL looks valid');
+// ── Step 1: prisma generate with a dummy URL ──────────────────────────────
+// prisma generate only needs a syntactically valid URL — it does NOT connect.
+// This avoids failures when DATABASE_URL has surrounding quotes or is malformed.
 console.log('→ Running: prisma generate...');
+const generateEnv = {
+  ...process.env,
+  DATABASE_URL: 'postgresql://placeholder:placeholder@placeholder:5432/placeholder',
+};
 execSync('npx prisma generate --schema=src/prisma/schema.prisma', {
   stdio: 'inherit',
-  env: process.env,
+  env: generateEnv,
 });
+console.log('✔ Prisma Client generated successfully.\n');
 
-// Only push DB schema on Render (RENDER env var is set automatically by Render)
-// Skip on local npm install to avoid accidental schema pushes
+// ── Step 2: prisma db push with the REAL sanitized DATABASE_URL ───────────
+// Only run on Render/CI (RENDER env var is set automatically by Render)
 if (process.env.RENDER || process.env.CI) {
-  console.log('→ Running: prisma db push (Render/CI detected)...');
+  let dbUrl = process.env.DATABASE_URL || '';
+
+  // Strip surrounding quotes (common copy-paste mistake from .env file)
+  dbUrl = dbUrl.replace(/^["']|["']$/g, '').trim();
+
+  if (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://')) {
+    console.error('\n❌ DATABASE_URL is invalid or missing on Render!');
+    console.error('   Go to Render → Environment → DATABASE_URL');
+    console.error('   Paste the value WITHOUT any surrounding quotes.\n');
+    process.exit(1);
+  }
+
+  console.log('→ Running: prisma db push...');
+  const pushEnv = { ...process.env, DATABASE_URL: dbUrl };
   execSync('npx prisma db push --schema=src/prisma/schema.prisma --accept-data-loss', {
     stdio: 'inherit',
-    env: process.env,
+    env: pushEnv,
   });
+  console.log('✔ Database synced successfully.\n');
 } else {
-  console.log('→ Skipping prisma db push (local environment)');
+  console.log('→ Skipping prisma db push (local environment).\n');
 }
 
-console.log('\n✅ Build complete — Prisma client generated and DB synced.\n');
+console.log('✅ Build complete!\n');
