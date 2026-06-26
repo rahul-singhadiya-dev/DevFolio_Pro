@@ -252,3 +252,88 @@
     border-radius: var(--radius-sm);
   }
 }
+
+/* ===== Scroll-Driven Frame Animation ===== */
+.scroll-animation-container {
+  position: relative;
+  height: 500vh; /* scrollable height to control animation speed */
+  width: 100vw;
+  margin-left: calc(-50vw + 50%); /* break out of parent container to go full-width */
+}
+
+.scroll-animation-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.scroll-animation-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scroll-animation-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  z-index: 10;
+}
+
+.scroll-animation-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--foreground);
+  border-radius: 50%;
+  animation: scroll-anim-spin 0.8s linear infinite;
+}
+
+@keyframes scroll-anim-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Dark gradient overlay between canvas and text for readability */
+.scroll-animation-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.35) 50%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Content layer positioned over the canvas */
+.scroll-animation-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none; /* let clicks pass through except for interactive children */
+}
+
+.scroll-animation-content > * {
+  pointer-events: auto; /* re-enable clicks on actual content */
+}
+
+/* Hero overlay content layout */
+.hero-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  max-width: 700px;
+}

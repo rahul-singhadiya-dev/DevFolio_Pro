@@ -1,6 +1,7 @@
 // src/pages/public/Home.jsx
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import ScrollAnimation from '../../components/common/ScrollAnimation';
 import { ArrowRight, Download, Briefcase, Award, FolderHeart, Code, ChevronRight, AlertCircle, Server, Database, Cpu, Terminal } from 'lucide-react';
 import client from '../../api/client';
 import Button from '../../components/common/Button';
@@ -208,32 +209,35 @@ export const Home = () => {
   return (
     <div className="w-full max-w-[1200px] mx-auto px-6 md:px-8">
       {/* 1. Hero Section */}
-      <section id="hero" className="min-h-[calc(100vh-64px)] flex flex-col justify-center items-center text-center px-6 py-20 relative overflow-hidden" aria-label="Introduction">
-        <div className="spotlight-backdrop" />
-        <div className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-semibold font-mono text-foreground shadow-sm mb-6 uppercase">
-          <span className="pingDotContainer">
-            <span className="pingDotAnimate" />
-            <span className="pingDotStatic" />
-          </span>
-          Available for projects
-        </div>
-        <h1 className="text-4xl md:text-5xl font-semibold mb-4 leading-none tracking-tight text-foreground">
-          Hi, I'm <span className="font-bold text-foreground">{displayedProfile.fullName}</span>.
-        </h1>
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6" aria-live="polite">
-          {typewriterSubtitle || '\u00a0'}
-          <span className="animate-pulse font-bold text-primary">|</span>
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[320px] sm:max-w-none justify-center items-center mb-12">
-          <Button variant="primary" onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}>
-            View My Work <ArrowRight size={16} />
-          </Button>
-          <Link to="/resume">
-            <Button variant="outline">
-              View Resume <Download size={16} />
-            </Button>
-          </Link>
-        </div>
+      <section id="hero" className="relative" aria-label="Introduction">
+        <ScrollAnimation>
+          <div className="hero-overlay-content">
+            <div className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-2.5 py-1 text-[10px] font-semibold font-mono text-white shadow-sm mb-6 uppercase">
+              <span className="pingDotContainer">
+                <span className="pingDotAnimate" />
+                <span className="pingDotStatic" />
+              </span>
+              Available for projects
+            </div>
+            <h1 className="text-4xl md:text-5xl font-semibold mb-4 leading-none tracking-tight text-white drop-shadow-lg">
+              Hi, I'm <span className="font-bold text-white">{displayedProfile.fullName}</span>.
+            </h1>
+            <p className="font-mono text-xs uppercase tracking-widest text-white/70 mb-6" aria-live="polite">
+              {typewriterSubtitle || '\u00a0'}
+              <span className="animate-pulse font-bold text-white">|</span>
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[320px] sm:max-w-none justify-center items-center">
+              <Button variant="primary" onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}>
+                View My Work <ArrowRight size={16} />
+              </Button>
+              <Link to="/resume">
+                <Button variant="outline">
+                  View Resume <Download size={16} />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </ScrollAnimation>
       </section>
 
       {/* 2. About Section */}
