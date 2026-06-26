@@ -1,0 +1,14 @@
+# render.yaml — Render deployment configuration
+# Render automatically reads this file from the repo root.
+# Docs: https://render.com/docs/render-yaml
+
+services:
+  - type: web
+    name: devfolio-pro-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && node scripts/render-build.js
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
